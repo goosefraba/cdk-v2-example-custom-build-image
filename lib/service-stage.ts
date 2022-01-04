@@ -11,7 +11,7 @@ export class ServiceStage extends Stage {
 
         new ServiceStack(
             this,
-            'ServiceStack',
+            'ServiceStackCdkV2CustomBuildImage',
             properties
         );
     }
