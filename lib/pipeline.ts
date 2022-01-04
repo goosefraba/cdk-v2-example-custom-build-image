@@ -18,7 +18,7 @@ export class Pipeline extends Stack {
         const pipeline = new CodePipeline(this, 'Pipeline', {
             pipelineName: 'cdk-v2-service-custom-build-image',
             synth: new ShellStep('Synth', {
-                input: CodePipelineSource.codeCommit(Repository.fromRepositoryName(this, 'CodeRepository', 'cdk-v2-service'), 'master'),
+                input: CodePipelineSource.codeCommit(Repository.fromRepositoryName(this, 'CodeRepository', 'cdk-v2-service-custom-build-image'), 'master'),
                 installCommands: [
                     'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc && npm i -g npm && npm install -g typescript@4.0.2 && npm install -g tslint@5.5.0'
                 ],
