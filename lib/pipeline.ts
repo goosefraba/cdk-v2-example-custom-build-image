@@ -1,22 +1,28 @@
-import {Stack, StackProps} from 'aws-cdk-lib';
-import {Construct} from 'constructs';
-import {CodePipeline, CodePipelineSource, ShellStep} from 'aws-cdk-lib/pipelines';
-import {Repository} from 'aws-cdk-lib/aws-codecommit';
-import {Effect, PolicyStatement} from 'aws-cdk-lib/aws-iam';
-import {ServiceStage} from './service-stage';
-import {BuildEnvironmentVariableType, ComputeType, LinuxBuildImage} from 'aws-cdk-lib/aws-codebuild';
-import {Secret} from 'aws-cdk-lib/aws-secretsmanager';
+import { Stack, StackProps } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
+import { Repository } from 'aws-cdk-lib/aws-codecommit';
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { ServiceStage } from './service-stage';
+import { BuildEnvironmentVariableType, ComputeType, LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 
-const SECRET_MANAGER_NPM_TOKEN_NAME = 'appointmed-infrastructure/3rdparty/npm';
+const SECRET_MANAGER_NPM_TOKEN_NAME = 'infrastructure/3rdparty/npm';
+
+export interface StackConfiguration extends StackProps {
+    readonly branchName: string;
+    readonly stageName: string;
+    readonly serviceName: string;
+}
 
 export class Pipeline extends Stack {
-    constructor(scope: Construct, id: string, props?: StackProps) {
+    constructor(scope: Construct, id: string, props: StackConfiguration) {
         super(scope, id, props);
 
         const npmToken = Secret.fromSecretNameV2(this, 'NpmTokenSecret', SECRET_MANAGER_NPM_TOKEN_NAME);
 
         const pipeline = new CodePipeline(this, 'Pipeline', {
-            pipelineName: 'cdk-v2-service-custom-build-image',
+            pipelineName: `cdk-v2-service-custom-build-image-${props.stageName}`,
             synth: new ShellStep('Synth', {
                 input: CodePipelineSource.codeCommit(Repository.fromRepositoryName(this, 'CodeRepository', 'cdk-v2-service-custom-build-image'), 'master'),
                 installCommands: [
@@ -66,6 +72,11 @@ export class Pipeline extends Stack {
             }
         });
 
-        pipeline.addStage(new ServiceStage(this, 'ServiceStage', {npmToken: npmToken.secretValue.toString()}));
+        pipeline.addStage(new ServiceStage(this, 'ServiceStage',
+            {
+                serviceName: props.serviceName,
+                npmToken: npmToken.secretValue.toString()
+            })
+        );
     }
 }
