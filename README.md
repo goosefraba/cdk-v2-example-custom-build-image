@@ -23,7 +23,7 @@ The example contains:
 * stage-support for the pipeline.
 * System Manager Parameter store lookup: Look up a value from the SSM paramter store (in this example: npm token to access private npm repositories)
 * custom build image using a Dockerfile
-* two lambda functions using the same docker build image
+* two lambda functions using the same docker build image and ARM64 Graviton processor configuration
 
 ------------------------------------------------------------------------------------------------------------------------
 
